@@ -53,9 +53,13 @@ public class Carver1 {
 
    //jpeg carver function assumes you are pointing at the beginning of a jpeg right after
    //the header
+
+   //TODO: change arguments so that each carver makes it's own file instead of outputting to the one provided.
    public static void carveJpeg(InputStream inputStream, OutputStream outputStream) {
        int byteRead;
        try {
+
+           //TODO: behavior for if you find a second image header in your image header ( if you have a nested image, then the first would be corrupted)
            //write the header
            outputStream.write(255);
            outputStream.write(216);
@@ -71,6 +75,22 @@ public class Carver1 {
                    if(byteRead == 217) {
                        outputStream.write(byteRead);
                        break; //this is the end
+                   }
+               }
+               //EXIF: (45 78 69 66)
+               else if (byteRead == 69) {
+                   byteRead = inputStream.read();
+                   if (byteRead == 120) {
+                       byteRead = inputStream.read();
+                       if (byteRead == 105) {
+                           byteRead = inputStream.read();
+                           if (byteRead == 102) {
+                               // this means that we have EXIF,
+                               // I will break without writing, so that the file is found by the second searcher fired off
+                               break;
+                               //TODO faster :) 
+                           }
+                       }
                    }
                }
            }//end while
