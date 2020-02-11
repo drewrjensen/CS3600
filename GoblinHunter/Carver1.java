@@ -9,7 +9,6 @@ public class Carver1 {
         String inputFile = "test1.dd";
         String outputFile = "file1.jpg";
         ArrayList<Thread> t = new ArrayList<Thread>();
-
         try (
             InputStream inputStream = new FileInputStream(inputFile);
             OutputStream outputStream = new FileOutputStream(outputFile);
@@ -39,6 +38,7 @@ public class Carver1 {
               	  	//if next 3 bytes are a match call carving method
               	  	if (byte2 == 216 && byte3==255 && byte4 == 224) {
                         carveJpeg(inputStream, outputStream);
+
                     }
               	  	else {
               	  		inputStream.reset(); //if it isn't a match reset to mark
@@ -88,7 +88,7 @@ public class Carver1 {
                                // this means that we have EXIF,
                                // I will break without writing, so that the file is found by the second searcher fired off
                                break;
-                               //TODO faster :) 
+                               //TODO faster :)
                            }
                        }
                    }
@@ -99,4 +99,15 @@ public class Carver1 {
            ex.printStackTrace();
        }
    }
+  }
+  class Carver impliments Runnable {
+      private InputStream in;
+      private OutputStream out;
+      public Carver (in,out) {
+          self.in = in;
+          self.out=out;
+      }
+      public void carve() {
+
+      }
   }
