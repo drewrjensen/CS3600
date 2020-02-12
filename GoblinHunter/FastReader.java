@@ -21,12 +21,12 @@ public class FastReader {
                         Cutter tmp = new Cutter(fil, x, gname);
                         t.add(new Thread(tmp));
                         t.get(t.size()-1).start();
-                        System.out.println("creating child, did it work ? ");
+                        System.out.println("creating child to cut out goblin");
                     }
                     //TODO make a flag for when exif's are found to skip making a thread for the next image found
                 }
             }
-            System.out.println("Parent complete");
+            System.out.println("Parent complete, now I sleep ");
         } catch (IOException e) {
             e.printStackTrace();
         }
