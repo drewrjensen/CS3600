@@ -10,16 +10,17 @@ public class FastReader {
 
             // Main loop running through the file right here
             for (int x = 0; x<fil.length; x++) {
-                fil[x] = fil[x] &
+                //fil[x] = fil[x] &
                 System.out.println(fil[x]);
-                if (fil[x] == 255) {
+                if (fil[x] == -1) {//255
                     //TODO fix this trailing number ?
-                    if (fil[x+1] == 216 && fil[x+2] == 255 && fil[x+3] == 224){
+                    //if (fil[x+1] == 216 && fil[x+2] == 255 && fil[x+3] == 224){
+                    if (fil[x+1] == -40 && fil[x+2] == -1 && fil[x+3] == -32){
                         //make a thread here
                         String gname = "goblin" + t.size() + ".jpg";
                         Cutter tmp = new Cutter(fil, x, gname);
                         t.add(new Thread(tmp));
-                        t.get(t.size()).start();
+                        t.get(t.size()-1).start();
                         System.out.println("creating child, did it work ? ");
                     }
                     //TODO make a flag for when exif's are found to skip making a thread for the next image found
@@ -50,9 +51,9 @@ class Cutter implements Runnable {
                 byte current = file[position];
                 System.out.println(current);
                 out.write(current);
-                if (current == 255) {
+                if (current == -1) {//255
                     position++;
-                    if (current ==217) {
+                    if (current ==-39) {//217
                         out.write(current);
                         out.close();
                         break;
