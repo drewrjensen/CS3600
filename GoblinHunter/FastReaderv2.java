@@ -4,7 +4,7 @@ public class FastReaderv2 {
     public static void main(String[] args) {
         ArrayList<Thread> t = new ArrayList<Thread>();
         try (
-            InputStream in = new FileInputStream("Goblins.dd");
+            InputStream in = new FileInputStream(args[0]);
         ) {
             byte[] fil = in.readAllBytes();
             boolean header = false;
@@ -18,17 +18,22 @@ public class FastReaderv2 {
                             Cutter tmp = new Cutter(fil, x, gname);
                             t.add(new Thread(tmp));
                             t.get(t.size()-1).start();
-                            System.out.println("creating child process to create " + gname);
+                            System.out.println("creating child process to create " + gname  + " from position:" + x);
                         }else {
                             header = false;
                         }
                     }
                     // checks for EXIF, and skips making this image if it finds one
-                    if (fil[x] == 69) {
-                        if (fil[x+1] == 120 && fil[x+2]== 105 && fil[x+3]== 102) {
-                            header = true;
-                        }
-                    }
+                    //if (fil[x] == -1) {
+                //        if (fil[x+1] == -31) {
+                //            header = true;
+                //        }
+                //    }
+                    //if (fil[x] == 69) {
+                    //    if (fil[x+1] == 120 && fil[x+2]== 105 && fil[x+3]== 102) {
+                    //        header = true;
+                    //    }
+                    //}
                 }
             }
             System.out.println("Parent complete");
@@ -41,7 +46,7 @@ class Cutter implements Runnable {
     public byte[] file;
     public int position;
     public OutputStream out;
-    public int ignore = 0;
+    //public int ignore = 0;
     public Cutter(byte[] b, int p,String name) {
         file = b;
         position=p;
@@ -57,21 +62,15 @@ class Cutter implements Runnable {
                 out.write(file[position]);
                 if (file[position] == -1) {
                     if (file[position+1] ==-39) {
-                        if (ignore == 0) {
                         out.write(file[position+1]);
                         out.close();
                         break;
                         }
-                        else {
-                            ignore--;
-                        }
+
                     }
-                    else if (file[position+1] == -40 && file[position+2] == -1 ){
-                        ignore++;
-                    }
-                }
                 position++;
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
