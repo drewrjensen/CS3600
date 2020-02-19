@@ -6,7 +6,21 @@ public class FastReaderv2 {
         try (
             InputStream in = new FileInputStream(args[0]);
         ) {
-            byte[] fil = in.readAllBytes();
+            byte[] fil;
+            try {
+                fil = in.readAllBytes();
+            } catch (Exception e) {
+                // imagine not having java 9
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[16384];
+
+                while ((nRead = in.read(data, 0, data.length)) != -1) {
+                  buffer.write(data, 0, nRead);
+                }
+
+                fil = buffer.toByteArray();
+            }
             boolean header = false;
             // Main loop running through the file right here
             for (int x = 0; x<fil.length; x++) {
