@@ -1,53 +1,67 @@
+/*
+* File carver fast reader (v2)
+* Written by:  Ethan Smith, Kaylee Hall, Drew Jensen, Jaeger Christensen
+* Date : Feb 25, 2020
+* This program takes a binary file, and uses multithreading to extract JPEG images from the binary
+*
+*/
+
+
 import java.io.*;
 import java.util.*;
 public class FastReaderv2 {
     public static void main(String[] args) {
+        // running requires two command line arguments
+        // args[0] ( the first) is the file to read from, allowing to select either goblins.dd or goblinsv2.dd ( defaults to goblinsv2)
+        // args[1] (second) allows for setting the output folder... not setting this argument will default to no folder
+        String infile;
+        try {
+            infile = args[0];
+        }
+        catch (Exception e) {
+            infile = "GoblinsV2.dd";
+        }
+        // if (args[0] != null) {
+        //     infile = args[0];
+        // }
+        // else {
+        //
+        // }
         ArrayList<Thread> t = new ArrayList<Thread>();
         try (
-            InputStream in = new FileInputStream(args[0]);
+            InputStream in = new FileInputStream(infile);
         ) {
-            byte[] fil;
-            try {
-                fil = in.readAllBytes();
-            } catch (Exception e) {
-                // imagine not having java 9
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[16384];
-
-                while ((nRead = in.read(data, 0, data.length)) != -1) {
-                  buffer.write(data, 0, nRead);
-                }
-
-                fil = buffer.toByteArray();
+            // reads in the file, as a byte array, which is apparently faster to read, but also easier to move through
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[16384];
+            while ((nRead = in.read(data, 0, data.length)) != -1) {
+              buffer.write(data, 0, nRead);
             }
+            byte[] fil = buffer.toByteArray();
             boolean header = false;
             // Main loop running through the file right here
             for (int x = 0; x<fil.length; x++) {
                 if (fil[x] == -1) {
                     if (fil[x+1] == -40 && fil[x+2] == -1 ){
-                        if (header == false) {
-                            //make a thread here
-                            String gname = "goblin" + t.size() + ".jpg";
-                            Cutter tmp = new Cutter(fil, x, gname);
-                            t.add(new Thread(tmp));
-                            t.get(t.size()-1).start();
-                            System.out.println("creating child process to create " + gname  + " from position:" + x);
-                        }else {
-                            header = false;
+                        //make a thread whenever a goblin(JPEG header) is found
+                        String gname;
+                        // checks to see if the CLI arg is set, otherwise sets to default
+                        try {
+                            //makes the directory if it doesn't exist
+                            File dir = new File(args[1]);
+                            if (!dir.exists()) {
+                                dir.mkdir();
+                            }
+                            gname = args[1] + "/goblin" + t.size() + ".jpeg";
+                        }catch (Exception e) {
+                            gname = "goblin" + t.size() + ".jpg";
                         }
+                        Cutter tmp = new Cutter(fil, x, gname);
+                        t.add(new Thread(tmp));
+                        t.get(t.size()-1).start();
+                        System.out.println("creating child process to create " + gname  + " from position:" + x);
                     }
-                    // checks for EXIF, and skips making this image if it finds one
-                    //if (fil[x] == -1) {
-                //        if (fil[x+1] == -31) {
-                //            header = true;
-                //        }
-                //    }
-                    //if (fil[x] == 69) {
-                    //    if (fil[x+1] == 120 && fil[x+2]== 105 && fil[x+3]== 102) {
-                    //        header = true;
-                    //    }
-                    //}
                 }
             }
             System.out.println("Parent complete");
@@ -57,10 +71,10 @@ public class FastReaderv2 {
     }
 }
 class Cutter implements Runnable {
+    // cutter is the child thread, and actually makes the images when they are found
     public byte[] file;
     public int position;
     public OutputStream out;
-    //public int ignore = 0;
     public Cutter(byte[] b, int p,String name) {
         file = b;
         position=p;
@@ -70,6 +84,7 @@ class Cutter implements Runnable {
             e.printStackTrace();
         }
     }
+    // this method writes to a new jpeg file until it finds the jpeg termination bytes
     public void run() {
         try {
             while (position < file.length) {
