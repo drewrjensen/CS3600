@@ -11,6 +11,9 @@ import java.io.*;
 import java.util.*;
 public class FastReaderv2 {
     public static void main(String[] args) {
+		
+		 long nano_startTime = System.nanoTime();
+		
         // running requires two command line arguments
         // args[0] ( the first) is the file to read from, allowing to select either goblins.dd or goblinsv2.dd ( defaults to goblinsv2)
         // args[1] (second) allows for setting the output folder... not setting this argument will default to no folder
@@ -60,11 +63,20 @@ public class FastReaderv2 {
                         Cutter tmp = new Cutter(fil, x, gname);
                         t.add(new Thread(tmp));
                         t.get(t.size()-1).start();
+						try{
+						t.get(t.size()-1).join();
+						} catch (InterruptedException f){
+							System.out.println(f);
+						}
                         System.out.println("creating child process to create " + gname  + " from position:" + x);
                     }
                 }
             }
+			
+		
             System.out.println("Parent complete");
+			long nano_endTime= System.nanoTime();
+			System.out.println("Time take in nano seconds: " + (nano_endTime - nano_startTime));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,6 +99,7 @@ class Cutter implements Runnable {
     // this method writes to a new jpeg file until it finds the jpeg termination bytes
     public void run() {
         try {
+			//long nano_startTime2 = System.nanoTime();
             while (position < file.length) {
                 out.write(file[position]);
                 if (file[position] == -1) {
@@ -99,7 +112,9 @@ class Cutter implements Runnable {
                     }
                 position++;
             }
-
+			System.out.println("Finished");
+			//long nano_endTime2= System.nanoTime();
+			//System.out.println("Total Time for thread to run in nano seconds: " + (nano_endTime2 - nano_startTime2));
         } catch (IOException e) {
             e.printStackTrace();
         }
